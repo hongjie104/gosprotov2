@@ -54,7 +54,9 @@ func readUint64(buf []byte) uint64 {
 
 func decodeBool(val *uint16, data []byte, sf *SprotoField, v reflect.Value) error {
 	b := true
-	if *val == 0 {
+	if val == nil {
+		b = false
+	} else if *val == 0 {
 		b = false
 	}
 	if v.Kind() == reflect.Ptr {
@@ -285,9 +287,6 @@ func decodeMessage(chunk []byte, st *SprotoType, v reflect.Value) (int, error) {
 				return 0, err
 			}
 			total += used
-		}
-		if tag.Val == nil {
-			return 0, fmt.Errorf("sproto<%s>: Val is nil", st.Name)
 		}
 		sf := st.FieldByTag(int(tag.Tag))
 		if sf == nil {
