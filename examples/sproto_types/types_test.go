@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	sproto "github.com/hongjie104/gosproto"
+	sproto "github.com/hongjie104/gosprotov2"
 )
 
 func ptrString(s string) *string {

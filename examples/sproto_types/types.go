@@ -10,7 +10,7 @@ package sproto_types
 import (
 	"reflect"
 
-	"github.com/hongjie104/gosproto"
+	"github.com/hongjie104/gosprotov2"
 )
 
 // avoids "imported but not used"

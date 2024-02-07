@@ -5,8 +5,8 @@ import (
 	"net"
 	"strconv"
 
-	sproto "github.com/hongjie104/gosproto"
-	"github.com/hongjie104/gosproto/examples/sproto_echo"
+	sproto "github.com/hongjie104/gosprotov2"
+	"github.com/hongjie104/gosprotov2/examples/sproto_echo"
 )
 
 func main() {

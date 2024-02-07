@@ -3,7 +3,7 @@ package sproto
 /*
 使用 go 语言类型表达 sproto 类型时，有些 sproto 的元信息（比如字段的tag值）较难直接表达。实现时，存在多种方案解决此问题。
 
-考虑了很多因素后，gosproto 选择使用结构体 tag 能力，以类似注解(annotation)的形式描述 sproto 元信息。
+考虑了很多因素后，gosprotov2 选择使用结构体 tag 能力，以类似注解(annotation)的形式描述 sproto 元信息。
 
 meta tag 形式:
 	sproto:"wire,tag,options..."

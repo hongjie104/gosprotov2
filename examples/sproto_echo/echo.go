@@ -10,7 +10,7 @@ package sproto_echo
 import (
 	"reflect"
 
-	"github.com/hongjie104/gosproto"
+	"github.com/hongjie104/gosprotov2"
 )
 
 // avoids "imported but not used"
@@ -26,7 +26,7 @@ type PingResponse struct {
 
 var Name string = "echo"
 var Protocols []*sproto.Protocol = []*sproto.Protocol{
-	&sproto.Protocol{
+	{
 		Type:       1,
 		Name:       "echo.ping",
 		MethodName: "Echo.Ping",

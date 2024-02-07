@@ -1,7 +1,7 @@
-[![Build Status](https://travis-ci.org/xjdrew/gosproto.svg?branch=master)](https://travis-ci.org/xjdrew/gosproto)
-[![codecov](https://codecov.io/gh/xjdrew/gosproto/branch/master/graph/badge.svg)](https://codecov.io/gh/xjdrew/gosproto)
+[![Build Status](https://travis-ci.org/xjdrew/gosprotov2.svg?branch=master)](https://travis-ci.org/xjdrew/gosprotov2)
+[![codecov](https://codecov.io/gh/xjdrew/gosprotov2/branch/master/graph/badge.svg)](https://codecov.io/gh/xjdrew/gosprotov2)
 
-# gosproto
+# gosprotov2
 
 [sproto](https://github.com/cloudwu/sproto)'s encoder and decoder in golang.
 
@@ -31,7 +31,7 @@ Or use [sprotodump](https://github.com/lvzixun/sprotodump) to change sproto sche
 ## test
 
 ```
-go test github.com/hongjie104/gosproto
+go test github.com/hongjie104/gosprotov2
 ```
 
 ## benchmark
