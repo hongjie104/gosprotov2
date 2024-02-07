@@ -10,7 +10,7 @@ package sproto_echo
 import (
 	"reflect"
 
-	"github.com/xjdrew/gosproto"
+	"github.com/hongjie104/gosproto"
 )
 
 // avoids "imported but not used"

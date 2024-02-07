@@ -1,3 +1,3 @@
-module github.com/xjdrew/gosproto
+module github.com/hongjie104/gosproto
 
 go 1.17
