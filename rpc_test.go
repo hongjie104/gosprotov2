@@ -7,33 +7,33 @@ import (
 )
 
 type FoobarRequest struct {
-	What *string `sproto:"string,0"`
+	What *string `sproto:"string,0,name=what"`
 }
 
 type FoobarResponse struct {
-	Ok   *bool   `sproto:"boolean,0"`
-	What *string `sproto:"string,1"`
+	Ok   *bool   `sproto:"boolean,0,name=ok"`
+	What *string `sproto:"string,1,name=what"`
 }
 
 type FooResponse struct {
-	Ok *bool `sproto:"boolean,0"`
+	Ok *bool `sproto:"boolean,0,name=ok"`
 }
 
 var protocols []*Protocol = []*Protocol{
-	{
+	&Protocol{
 		Type:       1,
 		Name:       "test.foobar",
 		MethodName: "Test.Foobar",
 		Request:    reflect.TypeOf(&FoobarRequest{}),
 		Response:   reflect.TypeOf(&FoobarResponse{}),
 	},
-	{
+	&Protocol{
 		Type:       2,
 		Name:       "test.foo",
 		MethodName: "Test.Foo",
 		Response:   reflect.TypeOf(&FooResponse{}),
 	},
-	{
+	&Protocol{
 		Type:       3,
 		Name:       "test.bar",
 		MethodName: "Test.Bar",

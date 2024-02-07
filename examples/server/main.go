@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 
-	sproto "github.com/hongjie104/gosprotov2"
-	"github.com/hongjie104/gosprotov2/examples/sproto_echo"
+	"github.com/xjdrew/gosproto"
+	"github.com/xjdrew/gosproto/examples/sproto_echo"
 
 	"net/http"
 	_ "net/http/pprof"

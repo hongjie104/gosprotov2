@@ -1,18 +1,12 @@
 package sproto
 
-import (
-	"fmt"
-	"math"
-	"reflect"
-	"unsafe"
-)
+import "reflect"
 
 const (
 	EncodeBufferSize = 4096
 	MaxEmbeddedInt   = 0x7fff - 1
 	MaxInt32         = 0x7fffffff
 	MinInt32         = -0x80000000
-	DOUBLE_SZ        = int(unsafe.Sizeof(float64(0.0)))
 )
 
 // little endian
@@ -102,7 +96,7 @@ func extractInt(v reflect.Value) (n uint64, sz int) {
 	case reflect.Int, reflect.Int64:
 		n1 := v.Int()
 		n = uint64(n1)
-		if n1 >= MinInt32 && n1 <= MaxInt32 {
+		if n1 >= -0x80000000 && n1 <= 0x7fffffff {
 			sz = 4
 		} else {
 			sz = 8
@@ -133,13 +127,6 @@ func encodeInt(sf *SprotoField, v reflect.Value) []byte {
 	} else {
 		writeUint64(buf, n)
 	}
-	return buf
-}
-
-func encodeDouble(sf *SprotoField, v reflect.Value) []byte {
-	n := math.Float64bits(v.Elem().Float())
-	buf := make([]byte, DOUBLE_SZ)
-	writeUint64(buf, n)
 	return buf
 }
 
@@ -175,24 +162,6 @@ func encodeBoolSlice(sf *SprotoField, v reflect.Value) []byte {
 	return buf
 }
 
-func encodeBytesSlice(sf *SprotoField, v reflect.Value) []byte {
-	var sz int
-	for i := 0; i < v.Len(); i++ {
-		bs := v.Index(i).Bytes()
-		sz += 4 + len(bs)
-	}
-	buf := make([]byte, sz)
-	offset := 0
-	for i := 0; i < v.Len(); i++ {
-		bs := v.Index(i).Bytes()
-		strLen := len(bs)
-		writeUint32(buf[offset:], uint32(strLen))
-		copy(buf[offset+4:], bs)
-		offset += 4 + strLen
-	}
-	return buf
-}
-
 func encodeStringSlice(sf *SprotoField, v reflect.Value) []byte {
 	var sz int
 	for i := 0; i < v.Len(); i++ {
@@ -212,11 +181,6 @@ func encodeStringSlice(sf *SprotoField, v reflect.Value) []byte {
 }
 
 func encodeIntSlice(sf *SprotoField, v reflect.Value) []byte {
-	sz := v.Len()
-	if sz == 0 {
-		return []byte{}
-	}
-
 	vals := make([]uint64, v.Len())
 	var intLen int = 4 // could be 4 and 8
 	for i := 0; i < v.Len(); i++ {
@@ -241,18 +205,6 @@ func encodeIntSlice(sf *SprotoField, v reflect.Value) []byte {
 	return buf
 }
 
-func encodeDoubleSlice(sf *SprotoField, v reflect.Value) []byte {
-	buf := make([]byte, 1+DOUBLE_SZ*v.Len())
-	buf[0] = uint8(DOUBLE_SZ)
-	offset := 1
-	for i := 0; i < v.Len(); i++ {
-		dv := v.Index(i).Float()
-		writeUint64(buf[offset:], math.Float64bits(dv))
-		offset += DOUBLE_SZ
-	}
-	return buf
-}
-
 func encodeStructSlice(sf *SprotoField, v reflect.Value) []byte {
 	sz := 0
 	vals := make([][]byte, v.Len())
@@ -271,33 +223,6 @@ func encodeStructSlice(sf *SprotoField, v reflect.Value) []byte {
 		offset += valLen + 4
 	}
 	return buf
-}
-
-// v is a map
-func encodeMap(sf *SprotoField, v reflect.Value) []byte {
-	st := sf.st
-
-	// map convert to slice
-	vals := reflect.MakeSlice(reflect.SliceOf(reflect.PtrTo(st.Type)), 0, v.Len())
-	iter := v.MapRange()
-	for iter.Next() {
-		if sf.ValueTag == -1 {
-			// normal map, slice element = map's value
-			vals = reflect.Append(vals, iter.Value())
-		} else {
-			// simple map, construct slice element by map's key and value
-			keySprotoField := st.FieldByTag(sf.KeyTag)
-			valueSprotoField := st.FieldByTag(sf.ValueTag)
-
-			val := reflect.New(st.Type)
-			elem := val.Elem()
-			// 处理值赋值到指针的情况；比如map key是值类型，但是slice元素字段定义为指针类型
-			setValue(elem.FieldByIndex(keySprotoField.field.Index), iter.Key())
-			setValue(elem.FieldByIndex(valueSprotoField.field.Index), iter.Value())
-			vals = reflect.Append(vals, val)
-		}
-	}
-	return encodeStructSlice(sf, vals)
 }
 
 func skipTag(tag, nextTag int) uint16 {
@@ -329,7 +254,7 @@ func encodeMessage(st *SprotoType, v reflect.Value) []byte {
 	if !v.IsNil() { // struct could be nil in struct array
 		for _, i := range st.order {
 			sf := st.Fields[i]
-			v1 := v.Elem().FieldByIndex(sf.field.Index)
+			v1 := v.Elem().FieldByIndex(sf.index)
 			nextTag := sf.Tag
 			if nextTag < 0 {
 				continue
@@ -337,8 +262,7 @@ func encodeMessage(st *SprotoType, v reflect.Value) []byte {
 			if v1.Kind() != reflect.Ptr &&
 				v1.Kind() != reflect.Slice &&
 				v1.Kind() != reflect.Array &&
-				v1.Kind() != reflect.Struct &&
-				v1.Kind() != reflect.Map {
+				v1.Kind() != reflect.Struct {
 				// 替内部处理取地址
 				v1 = v1.Addr()
 			}
@@ -363,12 +287,7 @@ func encodeMessage(st *SprotoType, v reflect.Value) []byte {
 	return Append(encodeHeaders(headers[:offset], len(buffer)), buffer)
 }
 
-func Encode(sp interface{}) (_ []byte, err error) {
-	defer func() {
-		if obj := recover(); obj != nil {
-			err = fmt.Errorf("sproto: Encode recovered from panic, err: %v", obj)
-		}
-	}()
+func Encode(sp interface{}) ([]byte, error) {
 	t, v, err := getbase(sp)
 	if err != nil {
 		return nil, err

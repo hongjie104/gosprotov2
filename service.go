@@ -237,6 +237,7 @@ func (s *Service) Dispatch() error {
 			return err
 		}
 	}
+	return nil
 }
 
 // unblock call a service which has a reply

@@ -21,8 +21,8 @@ const (
 )
 
 type rpcHeader struct {
-	Type    *int32 `sproto:"integer,0"`
-	Session *int32 `sproto:"integer,1"`
+	Type    *int32 `sproto:"integer,0,name=type"`
+	Session *int32 `sproto:"integer,1,name=session"`
 }
 
 type Protocol struct {

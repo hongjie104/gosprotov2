@@ -1,3 +1,3 @@
-module github.com/hongjie104/gosprotov2
+module github.com/xjdrew/gosproto
 
-go 1.17
+go 1.13

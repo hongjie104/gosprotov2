@@ -1,7 +1,4 @@
-[![Build Status](https://travis-ci.org/xjdrew/gosprotov2.svg?branch=master)](https://travis-ci.org/xjdrew/gosprotov2)
-[![codecov](https://codecov.io/gh/xjdrew/gosprotov2/branch/master/graph/badge.svg)](https://codecov.io/gh/xjdrew/gosprotov2)
-
-# gosprotov2
+# gosproto
 
 [sproto](https://github.com/cloudwu/sproto)'s encoder and decoder in golang.
 
@@ -9,19 +6,14 @@
 
 sproto type      | golang type
 ---------------- | -------------------------------------------------
-string           | \*string, string
-binary           | []byte
+string           | \*string, []byte, string
 integer          | \*int8, \*uint8, \*int16, \*uint16, \*int32, \*uint32, \*int64, \*uint64, \*int, \*uint, int8, uint8, int16, uint16, int32, uint32, int64, uint64, int, uint
-double           | \*float64, float64
 boolean          | \*bool, bool
 object           | \*struct
 array of string  | []string
 array of integer | []int8, []uint8, []int16, []uint16, []int32, []uint32, []int64, []uint64, []int, []uint
-array of double  | []double
 array of boolean | []bool
 array of object  | []\*struct
-map struct(key)  | map[key]struct
-map simple       | map[key]value
 
 ## schema
 
@@ -31,7 +23,7 @@ Or use [sprotodump](https://github.com/lvzixun/sprotodump) to change sproto sche
 ## test
 
 ```
-go test github.com/hongjie104/gosprotov2
+go test github.com/xjdrew/gosproto
 ```
 
 ## benchmark
@@ -57,11 +49,11 @@ ok      github.com/szyhf/go-sproto      5.864s
 
 ``` golang
 type WithPtr struct{
-	ID *int `sproto:"integer,0"`
+	ID *int `sproto:"integer,0,name=ID"`
 }
 
 type WithVal struct{
-	ID int `sproto:"integer,0"`
+	ID int `sproto:"integer,0,name=ID"`
 }
 
 ```
@@ -73,10 +65,3 @@ type WithVal struct{
 > 同样，个人不建议使用值类型的Struct，所以不支持了。
 
 更多的实现效果请参考encode_test.go中的例子。
-
-## TODO
-对 sproto 以下特性的支持缺失：
-
-原子类型：
-* fixed-point number 定点数，建议使用double类型
-

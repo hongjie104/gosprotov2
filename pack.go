@@ -29,11 +29,6 @@ func writeFF(dst, src []byte, n int) {
 	align8 := (n + 7) & (^7)
 	dst[0] = 0xff
 	dst[1] = uint8(align8/8 - 1)
-
-	if n > len(src) {
-		n = len(src)
-	}
-
 	copy(dst[2:], src[:n])
 	for i := n; i < align8; i++ {
 		dst[2+i] = 0
@@ -61,7 +56,7 @@ func Pack(src []byte) []byte {
 			ffP = offset
 			ffN = 1
 		} else if used == 8 && ffN > 0 {
-			ffN++
+			ffN += 1
 			if ffN == 256 {
 				writeFF(packed[ffP:], ffS, ffN*8)
 				ffN = 0

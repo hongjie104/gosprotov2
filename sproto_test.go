@@ -7,38 +7,35 @@ import (
 )
 
 type PhoneNumber struct {
-	Number *string `sproto:"string,0"`
-	Type   *int    `sproto:"integer,1"`
+	Number *string `sproto:"string,0,name=number"`
+	Type   *int    `sproto:"integer,1,name=type"`
 }
 
 type Person struct {
-	Name  *string        `sproto:"string,0"`
-	Id    *int           `sproto:"integer,1"`
-	Email *string        `sproto:"string,2"`
-	Phone []*PhoneNumber `sproto:"struct,3,array"`
+	Name  *string        `sproto:"string,0,name=name"`
+	Id    *int           `sproto:"integer,1,name=id"`
+	Email *string        `sproto:"string,2,name=email"`
+	Phone []*PhoneNumber `sproto:"struct,3,array,name=phone"`
 }
 
 type AddressBook struct {
-	Person []*Person `sproto:"struct,0,array"`
+	Person []*Person `sproto:"struct,0,array,name=person"`
 }
 
 type Human struct {
-	Name     *string  `sproto:"string,0"`
-	Age      *int     `sproto:"integer,1"`
-	Marital  *bool    `sproto:"boolean,2"`
-	Children []*Human `sproto:"struct,3,array"`
+	Name     *string  `sproto:"string,0,name=name"`
+	Age      *int     `sproto:"integer,1,name=age"`
+	Marital  *bool    `sproto:"boolean,2,name=marital"`
+	Children []*Human `sproto:"struct,3,array,name=children"`
 }
 
 type Data struct {
-	Numbers   []int64   `sproto:"integer,0,array"`
-	Bools     []bool    `sproto:"boolean,1,array"`
-	Number    *int      `sproto:"integer,2"`
-	BigNumber *int64    `sproto:"integer,3"`
-	Double    *float64  `sproto:"double,4"`
-	Doubles   []float64 `sproto:"double,5,array"`
-
-	Strings []string `sproto:"string,7,array"`
-	Bytes   []byte   `sproto:"string,8"`
+	Numbers   []int64  `sproto:"integer,0,array,name=numbers"`
+	Bools     []bool   `sproto:"boolean,1,array,name=bools"`
+	Number    *int     `sproto:"integer,2,name=number"`
+	BigNumber *int64   `sproto:"integer,3,name=bignumber"`
+	Strings   []string `sproto:"string,4,array,name=strings"`
+	Bytes     []byte   `sproto:"string,5,name=bytes"`
 }
 
 type TestCase struct {
@@ -67,25 +64,25 @@ var abDataPacked []byte = []byte{
 
 var ab AddressBook = AddressBook{
 	Person: []*Person{
-		{
+		&Person{
 			Name: String("Alice"),
 			Id:   Int(10000),
 			Phone: []*PhoneNumber{
-				{
+				&PhoneNumber{
 					Number: String("123456789"),
 					Type:   Int(1),
 				},
-				{
+				&PhoneNumber{
 					Number: String("87654321"),
 					Type:   Int(2),
 				},
 			},
 		},
-		{
+		&Person{
 			Name: String("Bob"),
 			Id:   Int(20000),
 			Phone: []*PhoneNumber{
-				{
+				&PhoneNumber{
 					Number: String("01234567890"),
 					Type:   Int(3),
 				},
@@ -95,7 +92,7 @@ var ab AddressBook = AddressBook{
 }
 
 var testCases []*TestCase = []*TestCase{
-	{
+	&TestCase{
 		Name: "SimpleStruct",
 		Struct: &Human{
 			Name:    String("Alice"),
@@ -111,17 +108,17 @@ var testCases []*TestCase = []*TestCase{
 			0x41, 0x6C, 0x69, 0x63, 0x65, // ("Alice")
 		},
 	},
-	{
+	&TestCase{
 		Name: "StructArray",
 		Struct: &Human{
 			Name: String("Bob"),
 			Age:  Int(40),
 			Children: []*Human{
-				{
+				&Human{
 					Name: String("Alice"),
 					Age:  Int(13),
 				},
-				{
+				&Human{
 					Name: String("Carol"),
 					Age:  Int(5),
 				},
@@ -150,7 +147,7 @@ var testCases []*TestCase = []*TestCase{
 			0x43, 0x61, 0x72, 0x6F, 0x6C, //("Carol")
 		},
 	},
-	{
+	&TestCase{
 		Name: "NumberArray",
 		Struct: &Data{
 			Numbers: []int64{1, 2, 3, 4, 5},
@@ -168,7 +165,7 @@ var testCases []*TestCase = []*TestCase{
 			0x05, 0x00, 0x00, 0x00, //(5)
 		},
 	},
-	{
+	&TestCase{
 		Name: "BigNumberArray",
 		Struct: &Data{
 			Numbers: []int64{
@@ -182,13 +179,13 @@ var testCases []*TestCase = []*TestCase{
 			0x00, 0x00, // (id = 0, value in data part)
 
 			0x19, 0x00, 0x00, 0x00, // (sizeof numbers)
-			0x08,                                           //(sizeof int64)
+			0x08,                                           //(sizeof int32)
 			0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, //((1<<32) + 1)
 			0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, //((1<<32) + 2)
 			0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, //((1<<32) + 3)
 		},
 	},
-	{
+	&TestCase{
 		Name: "BoolArray",
 		Struct: &Data{
 			Bools: []bool{false, true, false},
@@ -204,15 +201,15 @@ var testCases []*TestCase = []*TestCase{
 			0x00, //(false)
 		},
 	},
-	{
+	&TestCase{
 		Name: "Bytes",
 		Struct: &Data{
 			Bytes: []byte{0x28, 0x29, 0x30, 0x31},
 		},
 		Data: []byte{
 			0x02, 0x00, // (fn = 2)
-			0x0f, 0x00, // (skip id = 7)
-			0x00, 0x00, // (id = 8, value in data part)
+			0x09, 0x00, // (skip id = 4)
+			0x00, 0x00, // (id = 5, value in data part)
 
 			0x04, 0x00, 0x00, 0x00, // (sizeof bytes)
 			0x28, //(0x28)
@@ -221,15 +218,15 @@ var testCases []*TestCase = []*TestCase{
 			0x31, //(0x31)
 		},
 	},
-	{
+	&TestCase{
 		Name: "StringArray",
 		Struct: &Data{
 			Strings: []string{"Bob", "Alice", "Carol"},
 		},
 		Data: []byte{
 			0x02, 0x00, // (fn = 2)
-			0x0d, 0x00, // (skip id = 6)
-			0x00, 0x00, // (id = 7, value in data part)
+			0x07, 0x00, // (skip id = 3)
+			0x00, 0x00, // (id = 4, value in data part)
 
 			0x19, 0x00, 0x00, 0x00, // (sizeof []string)
 			0x03, 0x00, 0x00, 0x00, // (sizeof "Bob")
@@ -240,7 +237,7 @@ var testCases []*TestCase = []*TestCase{
 			0x43, 0x61, 0x72, 0x6F, 0x6C, //("Carol")
 		},
 	},
-	{
+	&TestCase{
 		Name: "Number",
 		Struct: &Data{
 			Number:    Int(100000),
@@ -259,44 +256,10 @@ var testCases []*TestCase = []*TestCase{
 			0x00, 0x1C, 0xF4, 0xAB, 0xFD, 0xFF, 0xFF, 0xFF, //(-10000000000, 64bit integer)
 		},
 	},
-	{
-		Name: "Double",
-		Struct: &Data{
-			Double:  Double(0.01171875),
-			Doubles: []float64{0.01171875, 23, 4},
-		},
-		Data: []byte{
-			0x03, 0x00, // (fn = 3)
-			0x07, 0x00, // (skip id = 3)
-			0x00, 0x00, // (id = 4, value in data part)
-			0x00, 0x00, // (id = 5, value in data part)
-
-			0x08, 0x00, 0x00, 0x00, // (sizeof number, data part)
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0x3f, // (0.01171875, 64bit double)
-
-			0x19, 0x00, 0x00, 0x00, // (sizeof doubles)
-			0x08,                                           // (sizeof double)
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0x3f, // (0.01171875, 64bit double)
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x37, 0x40, // (23, 64bit double)
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x40, // (4, 64bit double)
-		},
-	},
-	{
+	&TestCase{
 		Name:   "AddressBook",
 		Struct: &ab,
 		Data:   abData,
-	},
-	{
-		Name: "EmptyIntSlice",
-		Struct: &Data{
-			Numbers: []int64{},
-		},
-		Data: []byte{
-			0x01, 0x00, // (fn = 1)
-			0x00, 0x00, // (id = 1, value in data part)
-
-			0x00, 0x00, 0x00, 0x00, // (sizeof numbers)
-		},
 	},
 }
 
@@ -335,27 +298,6 @@ func TestDecode(t *testing.T) {
 			t.Log("expected:", tc.Data)
 			t.Fatalf("test case %s failed", tc.Name)
 		}
-	}
-}
-
-func TestEmptyIntSliceDecode(t *testing.T) {
-	// second encode format for empty int slice
-	data := []byte{
-		0x01, 0x00, // (fn = 1)
-		0x00, 0x00, // (id = 1, value in data part)
-
-		0x01, 0x00, 0x00, 0x00, // (sizeof numbers)
-		0x04, //(sizeof int32)
-	}
-
-	sp := new(Data)
-	_, err := Decode(data, sp)
-	if err != nil {
-		t.Fatalf("decode failed with error:%s", err)
-	}
-
-	if sp.Numbers == nil || len(sp.Numbers) != 0 {
-		t.Fatalf("decode failed: %v", sp.Numbers)
 	}
 }
 
