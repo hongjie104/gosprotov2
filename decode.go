@@ -392,7 +392,7 @@ func decodeMessage(chunk []byte, st *SprotoType, v reflect.Value) (int, error) {
 		}
 		if tag.Val == nil {
 			fmt.Fprintf(os.Stderr, "sproto<%s>: val is nil\n", st.Type.Name())
-			continue
+			return 0, fmt.Errorf("sproto<%s>: val is nil", st.Type.Name())
 		}
 		sf := st.FieldByTag(int(tag.Tag))
 		if sf == nil {
