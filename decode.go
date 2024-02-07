@@ -55,8 +55,12 @@ func readUint64(buf []byte) uint64 {
 
 func decodeBool(val *uint16, data []byte, sf *SprotoField, v reflect.Value) error {
 	b := true
-	if *val == 0 {
+	if val == nil {
 		b = false
+	} else {
+		if *val == 0 {
+			b = false
+		}
 	}
 	if v.Kind() == reflect.Ptr {
 		v.Addr().Elem().Set(reflect.ValueOf(&b))
